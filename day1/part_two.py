@@ -1,7 +1,3 @@
-def	printList(newLines):
-	for lines in newLines:
-		print(lines)
-
 def	getSum(number):
 	result = 0
 	for num in number:
