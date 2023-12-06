@@ -185,18 +185,24 @@ void	ProcessData::m_findValues()
 size_t	ProcessData::m_toLocation(std::string const &key, size_t location)
 {
 	size_t	i;
+	size_t	dest;
+	size_t	source;
+	size_t	length;
 	std::vector<std::tuple<size_t, size_t, size_t>>	temp;
 
 	temp = m_seedToLocation.find(key)->second;
 	for (auto &vec : temp)
 	{
 		i = 0;
-		if ((location < std::get<1>(vec)) || (location > (std::get<1>(vec) + (std::get<2>(vec) - 1))))
+		dest = std::get<0>(vec);
+		source = std::get<1>(vec);
+		length = std::get<2>(vec);
+		if ((location < source) || (location > (source + (length - 1))))
 			continue ;
-		while (i < std::get<2>(vec))
+		while (i < length)
 		{
-			if (location == (std::get<1>(vec) + i))
-				return (std::get<0>(vec) + i);
+			if (location == (source + i))
+				return (dest + i);
 			i++;
 		}
 	}
