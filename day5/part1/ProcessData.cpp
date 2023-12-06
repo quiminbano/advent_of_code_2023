@@ -1,6 +1,6 @@
 #include "ProcessData.hpp"
 
-ProcessData::ProcessData() : m_fail(false)
+ProcessData::ProcessData() : m_fail(false), m_smallestLength(SIZE_T_MAX)
 {
 	m_keys.push_back("seed-to-soil");
 	m_keys.push_back("soil-to-fertilizer");
@@ -140,6 +140,8 @@ int	ProcessData::m_fillMaps(std::string const &key, std::string const &iter)
 		destination = std::stoul(templ[0]);
 		source = std::stoul(templ[1]);
 		length = std::stoul(templ[2]);
+		if (length < m_smallestLength)
+			m_smallestLength = length;
 	}
 	catch(const std::exception& e)
 	{
@@ -183,7 +185,13 @@ size_t	ProcessData::m_toLocation(std::string const &key, size_t location)
 		{
 			if (location == (source + i))
 				return (dest + i);
-			i++;
+			i += m_smallestLength;
+			if ((source + i) > location)
+			{
+				while (location != (source + i))
+					i--;
+				return (dest + i);
+			}
 		}
 	}
 	return (location);

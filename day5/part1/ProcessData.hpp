@@ -21,6 +21,7 @@ private:
 	bool																	m_fail;
 	std::vector<size_t>														m_seed;
 	std::vector<size_t>														m_locations;
+	size_t																	m_smallestLength;
 	std::vector<std::string>												m_keys;
 	std::ifstream															m_file;
 	std::string																m_document;
