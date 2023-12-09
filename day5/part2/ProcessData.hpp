@@ -15,13 +15,21 @@
 //Algorhithm
 #include <algorithm>
 
+//Multithreading
+#include <thread>
+#include <mutex>
+
 class ProcessData
 {
 private:
 	bool																	m_fail;
 	std::vector<size_t>														m_seed;
-	std::vector<size_t>														m_locations;
+	std::vector<size_t>														m_range;
 	std::vector<std::string>												m_keys;
+	std::mutex																m_mtx1;
+	std::mutex																m_mtx2;
+	size_t																	m_smallestLength;
+	size_t																	m_smallestLocation;
 	std::ifstream															m_file;
 	std::string																m_document;
 	std::map<std::string, std::vector<std::tuple<size_t, size_t, size_t>>>	m_seedToLocation;

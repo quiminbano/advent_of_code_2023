@@ -1,6 +1,6 @@
 #include "ProcessData.hpp"
 
-ProcessData::ProcessData() : m_fail(false)
+ProcessData::ProcessData() : m_fail(false), m_smallestLength(SIZE_T_MAX), m_smallestLocation(SIZE_T_MAX)
 {
 	m_keys.push_back("seed-to-soil");
 	m_keys.push_back("soil-to-fertilizer");
@@ -75,9 +75,7 @@ int	ProcessData::m_fillContainers(std::vector<std::string> const &split)
 {
 	std::vector<std::string>	templ;
 	size_t						i;
-	size_t						j;
 	size_t						temp;
-	size_t						last;
 	int							flag;
 	int							ret;
 
@@ -96,19 +94,9 @@ int	ProcessData::m_fillContainers(std::vector<std::string> const &split)
 				{
 					temp = std::stoul(seeds);
 					if (i % 2 == 0)
-					{
 						m_seed.push_back(temp);
-						last = temp;
-					}
 					else
-					{
-						j = 1;
-						while (j < temp)
-						{
-							m_seed.push_back(last + j);
-							j++;
-						}
-					}
+						m_range.push_back(temp);
 				}
 				catch(const std::exception& e)
 				{
@@ -160,6 +148,8 @@ int	ProcessData::m_fillMaps(std::string const &key, std::string const &iter)
 		destination = std::stoul(templ[0]);
 		source = std::stoul(templ[1]);
 		length = std::stoul(templ[2]);
+		if (length < m_smallestLength)
+			m_smallestLength = length;
 	}
 	catch(const std::exception& e)
 	{
@@ -172,22 +162,32 @@ int	ProcessData::m_fillMaps(std::string const &key, std::string const &iter)
 void	ProcessData::m_findValues()
 {
 	size_t	location;
+	size_t	i;
 
+	auto rangeIter = m_range.begin();
 	for (auto &iter : m_seed)
 	{	
-		location = iter;
-		for (auto &keys : m_keys)
-			location = m_toLocation(keys, location);
-		m_locations.push_back(location);
+		i = 0;
+		while (i < *(rangeIter))
+		{
+			location = (iter + i);
+			for (auto &keys : m_keys)
+				location = m_toLocation(keys, location);
+			if (location < m_smallestLocation)
+				m_smallestLocation = location;
+			i++;
+		}
+		rangeIter++;
 	}
 }
 
 size_t	ProcessData::m_toLocation(std::string const &key, size_t location)
 {
-	size_t	i;
-	size_t	dest;
-	size_t	source;
-	size_t	length;
+	size_t											i;
+	size_t											dest;
+	size_t											source;
+	size_t											length;
+	size_t											diff;
 	std::vector<std::tuple<size_t, size_t, size_t>>	temp;
 
 	temp = m_seedToLocation.find(key)->second;
@@ -203,7 +203,12 @@ size_t	ProcessData::m_toLocation(std::string const &key, size_t location)
 		{
 			if (location == (source + i))
 				return (dest + i);
-			i++;
+			i += m_smallestLength;
+			if ((source + i) > location)
+			{
+				diff = ((source + i) - location);
+				return (dest + i - diff);
+			}
 		}
 	}
 	return (location);
@@ -211,6 +216,5 @@ size_t	ProcessData::m_toLocation(std::string const &key, size_t location)
 
 size_t	ProcessData::getSmallestLocation()
 {
-	std::sort(m_locations.begin(), m_locations.end());
-	return (*(m_locations.begin()));
+	return (m_smallestLocation);
 }
